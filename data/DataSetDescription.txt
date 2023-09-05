@@ -1,0 +1,29 @@
+This data set was generated in accordance with the semiconductor industry and contains sensor recordings from high-precision and high-tech production equipment. Basically, the semiconductor production consists of hundreds of process steps performing physical and chemical operations on so-called wafers, i.e. slices based on semiconductor material. Typically, bunches of wafers are aggregated into so-called lots of size 25, which always pass through the same operations in the production chain.
+
+In the production chain, each process equipment is equipped with several sensors recording physical parameters like gas flow, temperature, voltage, etc., resulting in so-called sensor data recorded during each process step. To keep the entire production as stable as possible, the sensor data is used in order to intervene in case of deviations.
+
+After the production, each device on the wafer is tested in the most careful way resulting in so-called wafer test data. In some cases, suspicious patterns occur in the wafer test data potentially leading to failure. In this case the root cause must be found in the production chain. For this purpose, the given sensor data is provided. The aim is to find correlations between the wafer test data and the sensor data in order to identify the root cause.
+
+The given data is divided into three data sets: "equipment1.csv", "equipment2.csv" and "response.csv". "equipment1.csv" and "equipment2.csv" represent the sensor data for two process equipment. The "response.csv" data set contains the corresponding wafer test data. For the unique identification, the first two columns in each data set are the lot number and the wafer number respectively. It must be mentioned that the number of wafers contained can vary within but also between the equipment.
+
+The exact column structure is given as follows:
+for "equipment1.csv" and "equipment2.csv":
+
+lot:			the lot number
+wafer:			the wafer number
+timestamp:		the timestamp of the respective sensor recordings (176 timestamps per wafer - represented as approximately every second one recording for the sensors)
+sensor_1:		the recordings of the first sensor
+sensor_2:		the recordings of the second sensor
+.
+.
+.
+sensor_56:		the recordings of the last sensor
+
+"sensor_1"-"sensor_24" belongs to "equipment1" and "sensor_25"-"sensor_56" belongs to "equipment2".
+
+for "response.csv":
+
+lot:			the lot number
+wafer:			the wafer number
+response:		the numerical test values
+class:			the "good"/"bad" classification depending on the response value (threshold: 0,75)

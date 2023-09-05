@@ -1,0 +1,2 @@
+model,mean_reward,acc,sensitivity,precision,f1,specificity,gm,mean_timesteps,mean_timesteps_good,mean_timesteps_bad,best_mean_reward,best_f1,best_sensitivity,best_specificity,best_acc,best_gm
+rl_model_final.zip,0.1417794520547945,0.7226027397260274,0.7254901960784313,0.3978494623655914,0.5138888888888888,0.7676348547717843,0.7462650744239744,49.27739726027397,31.412060301507537,20.71698113207547,x,x,x,x,x,x
