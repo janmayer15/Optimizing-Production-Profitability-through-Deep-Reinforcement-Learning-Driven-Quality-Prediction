@@ -1,0 +1,58 @@
+import pandas as pd, numpy as np
+from sklearn.model_selection import StratifiedKFold
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, f1_score, precision_score, confusion_matrix
+
+# Load datasets (semicolon separator)
+e1 = pd.read_csv("equipment1.csv", sep=";")
+e2 = pd.read_csv("equipment2.csv", sep=";")
+resp = pd.read_csv("response.csv", sep=";")
+
+# Convert timestamps (e.g., "timestamp_5" -> 5)
+e1["t_int"] = e1["timestamp"].str.split("_").str[-1].astype(int)
+e2["t_int"] = e2["timestamp"].str.split("_").str[-1].astype(int)
+
+# Merge equipment sensors
+merged = pd.merge(e1, e2, on=["lot","wafer","timestamp","t_int"], how="inner")
+
+# Select one-step-early
+tmax = merged.groupby(["lot","wafer"])["t_int"].transform("max")
+eligible = merged[merged["t_int"] <= (tmax-1)]
+idx = eligible.groupby(["lot","wafer"])["t_int"].idxmax()
+one_step = eligible.loc[idx]
+
+# Merge labels
+df = pd.merge(one_step, resp, on=["lot","wafer"], how="inner")
+X = df[[c for c in df.columns if c.startswith("sensor_")]].values
+y = (df["class"].str.lower()=="bad").astype(int).values
+
+# Models
+models = {
+    "LogReg": make_pipeline(StandardScaler(), LogisticRegression(max_iter=2000, class_weight="balanced")),
+    "RandomForest": RandomForestClassifier(n_estimators=50, max_depth=8, random_state=42, class_weight="balanced_subsample")
+}
+
+def eval_metrics(y_true, y_pred):
+    cm = confusion_matrix(y_true, y_pred, labels=[0,1])
+    tn, fp, fn, tp = cm.ravel()
+    sens = tp/(tp+fn); spec = tn/(tn+fp)
+    gm = np.sqrt(sens*spec)
+    return {
+        "Accuracy": accuracy_score(y_true, y_pred),
+        "F1": f1_score(y_true, y_pred),
+        "GM": gm, "Sensitivity": sens, "Specificity": spec,
+        "Precision": precision_score(y_true, y_pred)
+    }
+
+# Cross-validation
+cv = StratifiedKFold(n_splits=2, shuffle=True, random_state=42)
+for name, model in models.items():
+    scores=[]
+    for tr, te in cv.split(X,y):
+        model.fit(X[tr], y[tr])
+        yp = model.predict(X[te])
+        scores.append(eval_metrics(y[te], yp))
+    print(name, pd.DataFrame(scores).mean())
